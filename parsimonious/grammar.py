@@ -238,13 +238,12 @@ rule_syntax = (r'''
     lookahead_term = "&" term _
     term = not_term / lookahead_term / quantified / atom
     quantified = atom quantifier
-    atom = reference / literal / regex / parenthesized / named_parenthesized
+    atom = reference / literal / regex / parenthesized
     regex = "~" spaceless_literal ~"[ilmsuxa]*"i _
     parenthesized = "(" _ expression ")" _
-    named_parenthesized = "(?P<" label ">" _ expression ")" _
     quantifier = ~r"[*+?]|\{\d*,\d+\}|\{\d+,\d*\}|\{\d+\}" _
     reference = label !equals
-    
+
     # A subsequent equal sign is the only thing that distinguishes a label
     # (which begins a new rule) from a reference (which is just a pointer to a
     # rule defined somewhere else):
@@ -325,12 +324,6 @@ class RuleVisitor(NodeVisitor):
 
         """
         left_paren, _, expression, right_paren, _ = parenthesized
-        return expression
-
-    def visit_named_parenthesized(self, node, parenthesized_named):
-        """Set the name of the expression to the given name"""
-        left_paren, label, right_angle, _, expression, right_paren, _ = parenthesized_named
-        expression.name = label
         return expression
 
     def visit_quantifier(self, node, quantifier):
